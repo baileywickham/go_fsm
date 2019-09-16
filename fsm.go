@@ -1,43 +1,60 @@
-package main
+package fsm
 
-type fsm struct {
+type Fsm struct {
 	current     string
-	transitions []transition
+	transitions map[transition_key]string //maps key to name of transiston
 }
 
-type transition struct {
-	name string
+// An event
+type Transition struct {
+	Name string
+	From string
+	To   string
+	Callback
+}
+
+// map[transition_key]string where string is the name of the transition
+type transition_key struct {
+	to   string
 	from string
-	to   []string
-	callback
 }
 
-type callback interface{}
+type Callback interface{}
 
-func fsm_init(inital string, states []string) fsm {
-	m := fsm{current: inital}
+func Fsm_init(inital string) Fsm {
+	// shuold this return a pointer? Probably
+	m := Fsm{
+		current:     inital,
+		transitions: make(map[transition_key]string),
+	}
+
 	return m
 }
 
-func (m *fsm) add_transition(t transition) {
-	m.transitions = append(m.transitions, t)
+func (m *Fsm) Add_transition(t Transition) {
+	t_state := transition_key{from: t.From, to: t.To}
+	m.transitions[t_state] = t.Name
 
 }
 
-func (m *fsm) can(next string) bool {
+func (m *Fsm) Can(next string) bool {
 	// needs to be rewritten with a map.
-	for _, tran := range m.transitions {
-		if tran.name == m.current {
-			for _, possible := range tran.to {
-				if next == possible {
-					return true
-				}
-			}
+	t_state := transition_key{from: m.current, to: next}
+	_, can := m.transitions[t_state]
+	return can
+}
+func (m *Fsm) Possible_transitions() []string {
+	var transitions []string
+	for t := range m.transitions {
+		if t.from == m.current {
+			// return names of transitions possible by checking transition map
+			transitions = append(transitions, m.transitions[t])
 		}
 	}
-	return false
+	return transitions
+
 }
 
 func main() {
-	runner()
+
 }

@@ -13,10 +13,15 @@ type Transition struct {
 	Callback
 }
 
-// map[transition_key]string where string is the name of the transition
+// map[transition_key]string where string is the dst
 type transition_key struct {
-	to   string
-	from string
+	name    string
+	current string
+}
+
+type callback_key struct {
+	Callback
+	Name string
 }
 
 type Callback interface{}
@@ -24,7 +29,8 @@ type Callback interface{}
 func Fsm_init(inital string) Fsm {
 	// shuold this return a pointer? Probably
 	m := Fsm{
-		current:     inital,
+		current: inital,
+		// maps key to dst
 		transitions: make(map[transition_key]string),
 	}
 
@@ -32,29 +38,30 @@ func Fsm_init(inital string) Fsm {
 }
 
 func (m *Fsm) Add_transition(t Transition) {
-	t_state := transition_key{from: t.From, to: t.To}
-	m.transitions[t_state] = t.Name
+	t_state := transition_key{name: t.Name, current: t.From}
+	m.transitions[t_state] = t.dst
 
 }
 
-func (m *Fsm) Can(next string) bool {
+func (m *Fsm) Can(name string) bool {
 	// needs to be rewritten with a map.
-	t_state := transition_key{from: m.current, to: next}
+	t_state := transition_key{name: name, current: m.current}
 	_, can := m.transitions[t_state]
 	return can
 }
+
 func (m *Fsm) Possible_transitions() []string {
 	var transitions []string
-	for t := range m.transitions {
-		if t.from == m.current {
-			// return names of transitions possible by checking transition map
-			transitions = append(transitions, m.transitions[t])
+	for key, value := range m.transitions {
+		if key.current == m.current {
+			transitions = append(transitions, value)
 		}
 	}
 	return transitions
 
 }
 
-func main() {
-
+// param is name of event that causes transitions between states
+func (m *Fsm) Event(next_state string) error {
+	return nil
 }

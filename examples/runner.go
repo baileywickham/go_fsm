@@ -39,4 +39,9 @@ func main() {
 		println("adding transition")
 		m.Add_transition(tran)
 	}
+
+	println("Possible states to transition to: ")
+	for _, tran := range m.Possible_transitions() {
+		println(tran)
+	}
 }

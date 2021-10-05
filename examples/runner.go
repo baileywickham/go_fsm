@@ -7,41 +7,31 @@ import (
 )
 
 func main() {
-	t1 := fsm.Transition{
-		Name:     "push",
-		From:     "unlocked",
-		To:       "locked",
-		Callback: func() { fmt.Println("You entered the gate") },
-	}
+	s0 := fsm.State{
+		Name:   "unlocked",
+		Before: func() { fmt.Println("The door is now unlocked") },
+		ToState: map[string]string{
+			"push": "locked",
+			"coin": "unlocked"}}
+	s1 := fsm.State{
+		Name:   "locked",
+		Before: func() { fmt.Println("The door is now locked") },
+		ToState: map[string]string{
+			"push": "locked",
+			"coin": "unlocked"}}
 
-	t2 := fsm.Transition{
-		Name:     "push",
-		From:     "locked",
-		To:       "locked",
-		Callback: func() { fmt.Println("You pushed but it was locked") },
-	}
-	t3 := fsm.Transition{
-		Name:     "coin",
-		From:     "locked",
-		To:       "unlocked",
-		Callback: func() { fmt.Println("You inserted a coin and unlocked the gate") },
-	}
-	t4 := fsm.Transition{
-		Name:     "coin",
-		From:     "unlocked",
-		To:       "unlocked",
-		Callback: func() { fmt.Println("You inserted a coin but the gate was already unlocked") },
-	}
-	t := []fsm.Transition{t1, t2, t3, t4}
-	m := fsm.Fsm_init("locked")
+	m := fsm.InitFsm("locked")
 
-	for _, tran := range t {
-		println("adding transition")
-		m.Add_transition(tran)
-	}
+	m.AddState(s0)
+	m.AddState(s1)
 
 	println("Possible states to transition to: ")
-	for _, tran := range m.Possible_transitions() {
+	for _, tran := range m.PossibleStates() {
 		println(tran)
 	}
+
+	m.Event("coin")
+	m.Event("coin")
+	m.Event("push")
+	m.Event("coin")
 }

@@ -1,3 +1,3 @@
 # go_fsm
 
-Soon to be a fsm for http/tls handshakes for a server. 
+Initally for http3/tls handshakes, this became a toy FSM project. Needs some work but the example is functional

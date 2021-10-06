@@ -4,12 +4,17 @@ import (
 	"errors"
 )
 
+type Transition struct {
+	To       string
+	Callback func()
+}
+
 type State struct {
 	Name   string
 	Before func()
 	After  func()
 	// event -> end state
-	ToState map[string]string
+	ToState map[string]Transition
 }
 
 type Fsm struct {
@@ -51,7 +56,7 @@ func (m *Fsm) Can(event string) bool {
 func (m *Fsm) PossibleStates() []string {
 	states := make([]string, 0)
 	for _, state := range m.Current().ToState {
-		states = append(states, state)
+		states = append(states, state.To)
 	}
 	return states
 }
@@ -62,12 +67,14 @@ func (m *Fsm) Event(event string) error {
 	}
 
 	currentState := m.Current()
-	newState := m.states[currentState.ToState[event]]
+	transistion := currentState.ToState[event]
+	newState := m.states[transistion.To]
 
 	if currentState.After != nil {
 		currentState.After()
 	}
 	m.SetState(newState)
+	transistion.Callback()
 	if newState.Before != nil {
 		newState.Before()
 	}
